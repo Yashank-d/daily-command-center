@@ -1,5 +1,4 @@
 Daily Command Center - A 28-Day Habit & Routine Tracker
-<p align="center">Add a screenshot or GIF of your application here!</p>
 
 A modern, responsive, and self-contained web application designed to help you build a powerful new routine over 28 days. This tool is built to foster discipline, track progress, and create momentum through a points-based reward system. All data is stored locally in your browser, requiring no backend or setup.
 
