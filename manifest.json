@@ -1,7 +1,7 @@
 {
   "name": "Daily Command Center",
   "short_name": "Command",
-  "start_url": "/tracker.html",
+  "start_url": "./tracker.html",
   "display": "standalone",
   "background_color": "#111827",
   "theme_color": "#111827",
