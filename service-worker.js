@@ -2,7 +2,7 @@
 const CACHE_NAME = "daily-command-center-cache-v2";
 
 const urlsToCache = [
-  "./tracker.html",
+  "./index.html",
   "https://cdn.tailwindcss.com",
   "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap",
   "https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js",
