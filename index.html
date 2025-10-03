@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .task-checkbox:checked + label {
+        text-decoration: line-through;
+        color: #4b5563; /* gray-600 */
+      }
+      .task-checkbox:checked + label .task-circle {
+        background-color: #3b82f6; /* blue-500 */
+        border-color: #3b82f6; /* blue-500 */
+      }
+      .task-checkbox:checked + label .task-circle svg {
+        display: block;
+      }
+      /* Custom scrollbar for a cleaner look */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1f2937; /* gray-800 */
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563; /* gray-600 */
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280; /* gray-500 */
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-900 text-gray-100 flex flex-col items-center min-h-screen p-4 sm:p-6"
+  >
+    <div id="app" class="w-full max-w-2xl mx-auto">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <h1
+          id="main-title"
+          class="text-3xl sm:text-4xl font-bold text-white tracking-tight"
+        >
+          Day 1: The Foundation
+        </h1>
+        <div
+          id="clock"
+          class="text-2xl font-semibold text-blue-400 tracking-wider mt-2"
+        ></div>
+        <p
+          id="daily-quote"
+          class="text-gray-400 mt-3 text-md h-10 flex items-center justify-center text-center italic px-2"
+        ></p>
+      </header>
+
+      <!-- Progress Bars -->
+      <div class="space-y-4 mb-8">
+        <div>
+          <div
+            class="flex justify-between items-center mb-2 text-sm font-medium text-gray-300"
+          >
+            <span>Today's Progress</span>
+            <span id="daily-progress-percent">0%</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-2.5">
+            <div
+              id="daily-progress-bar"
+              class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div>
+          <div
+            class="flex justify-between items-center mb-2 text-sm font-medium text-gray-300"
+          >
+            <span>28-Day Progress</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-2.5">
+            <div
+              id="progress-bar"
+              class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pre-Challenge Message -->
+      <div
+        id="pre-challenge-message"
+        class="hidden text-center bg-gray-800 p-6 rounded-lg"
+      >
+        <h2 class="text-2xl font-bold mb-2">
+          The challenge has not started yet.
+        </h2>
+        <p id="start-date-info" class="text-gray-400"></p>
+      </div>
+
+      <!-- Post-Challenge Message -->
+      <div
+        id="post-challenge-message"
+        class="hidden text-center bg-gray-800 p-6 rounded-lg"
+      >
+        <h2 class="text-2xl font-bold mb-2">Congratulations!</h2>
+        <p class="text-gray-400">
+          You've completed the 28-day challenge. This is your new baseline. Keep
+          building.
+        </p>
+      </div>
+
+      <!-- Main Tracker Content -->
+      <div id="tracker-content" class="hidden">
+        <!-- Daily Tracker -->
+        <div class="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg mb-8">
+          <h2
+            id="daily-title"
+            class="text-xl font-semibold mb-6 border-b border-gray-700 pb-4"
+          >
+            Today's Mission
+          </h2>
+          <div id="task-list" class="space-y-5">
+            <!-- Tasks will be dynamically injected here -->
+          </div>
+        </div>
+
+        <!-- Score & Rewards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-300 mb-4">Scoreboard</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-400">Today's Score</span>
+                <span
+                  id="today-score"
+                  class="font-bold text-xl sm:text-2xl text-white"
+                  >0 / 10</span
+                >
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-400">Current Week Score</span>
+                <span
+                  id="week-score"
+                  class="font-bold text-xl sm:text-2xl text-blue-400"
+                  >0</span
+                >
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-400">Total Score</span>
+                <span
+                  id="total-score"
+                  class="font-bold text-xl sm:text-2xl text-green-400"
+                  >0</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-lg font-semibold text-gray-300 mb-4">
+              This Week's Reward Tier
+            </h3>
+            <div
+              id="reward-tier"
+              class="text-center p-4 rounded-md bg-gray-700/50 space-y-1"
+            >
+              <!-- Reward tier content will be injected here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reset Button -->
+      <footer class="text-center mt-8">
+        <button
+          id="reset-button"
+          class="text-xs text-gray-600 hover:text-gray-400 transition-colors py-2 px-4 rounded-md"
+        >
+          Reset all progress
+        </button>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        dayjs.extend(dayjs_plugin_utc);
+
+        // --- CONFIGURATION ---
+        const quotes = [
+          "The secret of getting ahead is getting started.",
+          "Discipline is the bridge between goals and accomplishment.",
+          "You don’t have to be great to start, but you have to start to be great.",
+          "Success is the sum of small efforts, repeated day in and day out.",
+          "The future depends on what you do today.",
+          "Don’t watch the clock; do what it does. Keep going.",
+          "Believe you can and you're halfway there.",
+          "It always seems impossible until it's done.",
+          "The pain you feel today will be the strength you feel tomorrow.",
+          "Focus on your goal. Don’t look in any direction but ahead.",
+          "The key to success is to focus on goals, not obstacles.",
+          "You are what you repeatedly do. Excellence, then, is not an act, but a habit.",
+          "Motivation is what gets you started. Habit is what keeps you going.",
+          "A year from now you may wish you had started today.",
+          "Consistency is more important than perfection.",
+          "Wake up with determination. Go to bed with satisfaction.",
+          "Small progress is still progress.",
+          "Don't limit your challenges. Challenge your limits.",
+          "The harder you work for something, the greater you'll feel when you achieve it.",
+          "Push yourself, because no one else is going to do it for you.",
+          "Success isn’t always about greatness. It’s about consistency.",
+          "Your only limit is your mind.",
+          "Action is the foundational key to all success.",
+          "If you get tired, learn to rest, not to quit.",
+          "The difference between ordinary and extraordinary is that little extra.",
+          "It's going to be hard, but hard does not mean impossible.",
+          "The secret to your future is hidden in your daily routine.",
+          "You have to be at your strongest when you’re feeling at your weakest.",
+        ];
+
+        const tasks = [
+          { id: "wakeup", text: "Wake up at 7:00 AM (No Snooze)", points: 1 },
+          { id: "sunlight", text: "10 mins Sunlight + Hydration", points: 1 },
+          { id: "meditation", text: "15 mins Yoga / Meditation", points: 1 },
+          { id: "learn1", text: "Deep Work Block 1 (2.5 hrs)", points: 1 },
+          { id: "learn2", text: "Deep Work Block 2 (2.5 hrs)", points: 1 },
+          { id: "learn3", text: "Deep Work Block 3 (2.5 hrs)", points: 2 },
+          { id: "workout", text: "Complete Daily Workout", points: 1 },
+          { id: "meals", text: "Stick to 2-Meal Plan", points: 1 },
+          {
+            id: "sunset",
+            text: "Digital Sunset (No Screens after 9:30 PM)",
+            points: 1,
+          },
+        ];
+        const TOTAL_DAILY_POINTS = tasks.reduce(
+          (sum, task) => sum + task.points,
+          0
+        );
+
+        // --- DOM ELEMENTS ---
+        const mainTitle = document.getElementById("main-title");
+        const dailyQuoteEl = document.getElementById("daily-quote");
+        const clockEl = document.getElementById("clock");
+        const progressPercent = document.getElementById("progress-percent");
+        const progressBar = document.getElementById("progress-bar");
+        const dailyProgressPercent = document.getElementById(
+          "daily-progress-percent"
+        );
+        const dailyProgressBar = document.getElementById("daily-progress-bar");
+        const dailyTitle = document.getElementById("daily-title");
+        const taskList = document.getElementById("task-list");
+        const todayScoreEl = document.getElementById("today-score");
+        const weekScoreEl = document.getElementById("week-score");
+        const totalScoreEl = document.getElementById("total-score");
+        const rewardTierEl = document.getElementById("reward-tier");
+        const preChallengeMessage = document.getElementById(
+          "pre-challenge-message"
+        );
+        const startDateInfo = document.getElementById("start-date-info");
+        const postChallengeMessage = document.getElementById(
+          "post-challenge-message"
+        );
+        const trackerContent = document.getElementById("tracker-content");
+        const resetButton = document.getElementById("reset-button");
+
+        // --- STATE MANAGEMENT ---
+        let state = {};
+        let challengeStartDate;
+
+        // --- LOGIC FUNCTIONS ---
+
+        function updateClock() {
+          clockEl.textContent = dayjs().format("h:mm:ss A");
+        }
+
+        function getDayInfo() {
+          const today = dayjs().startOf("day");
+          const diffInDays = today.diff(challengeStartDate, "day");
+          const currentDay = diffInDays + 1;
+          const currentWeek = Math.floor(diffInDays / 7) + 1;
+          return { today, currentDay, currentWeek };
+        }
+
+        function loadState() {
+          const savedState = localStorage.getItem("routineTrackerState");
+          state = savedState ? JSON.parse(savedState) : {};
+        }
+
+        function saveState() {
+          localStorage.setItem("routineTrackerState", JSON.stringify(state));
+        }
+
+        function updateScores(currentDay) {
+          // Today's Score
+          let todayScore = 0;
+          const dayState = state[currentDay] || {};
+          tasks.forEach((task) => {
+            if (dayState[task.id]) {
+              todayScore += task.points;
+            }
+          });
+          todayScoreEl.textContent = `${todayScore} / ${TOTAL_DAILY_POINTS}`;
+
+          // Daily Progress Bar
+          const dailyProgress =
+            TOTAL_DAILY_POINTS > 0
+              ? (todayScore / TOTAL_DAILY_POINTS) * 100
+              : 0;
+          dailyProgressBar.style.width = `${dailyProgress}%`;
+          dailyProgressPercent.textContent = `${Math.round(dailyProgress)}%`;
+
+          // Week and Total Score
+          let weekScore = 0;
+          let totalScore = 0;
+          const { currentWeek } = getDayInfo();
+
+          for (let day = 1; day <= 28; day++) {
+            const dayData = state[day] || {};
+            let scoreForDay = 0;
+            tasks.forEach((task) => {
+              if (dayData[task.id]) scoreForDay += task.points;
+            });
+
+            if (scoreForDay > 0) {
+              totalScore += scoreForDay;
+              const weekOfThisDay = Math.floor((day - 1) / 7) + 1;
+              if (weekOfThisDay === currentWeek) weekScore += scoreForDay;
+            }
+          }
+          weekScoreEl.textContent = weekScore;
+          totalScoreEl.textContent = totalScore;
+          updateRewardTier(weekScore);
+        }
+
+        function updateRewardTier(weekScore) {
+          const goldThreshold = 60,
+            silverThreshold = 45;
+          if (weekScore >= goldThreshold) {
+            rewardTierEl.innerHTML = `<p class="font-bold text-lg text-yellow-400">Tier: GOLD</p><p class="text-sm text-gray-400">Reward: Big ticket item or a weekend trip.</p>`;
+          } else if (weekScore >= silverThreshold) {
+            rewardTierEl.innerHTML = `<p class="font-bold text-lg text-gray-300">Tier: SILVER</p><p class="text-sm text-gray-400">Reward: Go out for a nice dinner or buy a new book/game.</p>`;
+          } else {
+            rewardTierEl.innerHTML = `<p class="font-bold text-lg text-gray-500">Tier: BRONZE</p><p class="text-sm text-gray-500">Score ${silverThreshold}+ for Silver Tier reward.</p>`;
+          }
+        }
+
+        function handleTaskToggle(e, currentDay) {
+          if (e.target.matches(".task-checkbox")) {
+            const taskId = e.target.dataset.task;
+            if (!state[currentDay]) state[currentDay] = {};
+            state[currentDay][taskId] = e.target.checked;
+            saveState();
+            updateScores(currentDay);
+          }
+        }
+
+        function handleReset() {
+          // Using a custom modal would be better, but confirm is simple for this use case.
+          if (
+            confirm(
+              "Are you sure you want to reset all your progress? This will erase all data and reset the start date."
+            )
+          ) {
+            localStorage.removeItem("routineTrackerState");
+            localStorage.removeItem("challengeStartDate");
+            window.location.reload();
+          }
+        }
+
+        function render() {
+          const { today, currentDay } = getDayInfo();
+
+          // Handle pre/post challenge states
+          if (currentDay < 1 || currentDay > 28) {
+            trackerContent.classList.add("hidden");
+            if (currentDay < 1) {
+              preChallengeMessage.classList.remove("hidden");
+              startDateInfo.textContent = `Your start date is set for ${challengeStartDate.format(
+                "dddd, MMMM D"
+              )}.`;
+            } else {
+              postChallengeMessage.classList.remove("hidden");
+              progressBar.style.width = `100%`;
+              progressPercent.textContent = `100%`;
+            }
+            return;
+          }
+
+          trackerContent.classList.remove("hidden");
+          preChallengeMessage.classList.add("hidden");
+          postChallengeMessage.classList.add("hidden");
+
+          mainTitle.textContent = `Day ${currentDay}: Own Today`;
+          dailyQuoteEl.textContent = `"${
+            quotes[(currentDay - 1) % quotes.length]
+          }"`;
+
+          const progress = Math.max(0, ((currentDay - 1) / 28) * 100);
+          progressBar.style.width = `${progress}%`;
+          progressPercent.textContent = `${Math.round(progress)}%`;
+
+          taskList.innerHTML = tasks
+            .map((task) => {
+              const isChecked =
+                (state[currentDay] && state[currentDay][task.id]) || false;
+              return `
+                        <div class="flex items-center">
+                            <input type="checkbox" id="task-${
+                              task.id
+                            }" data-task="${
+                task.id
+              }" class="task-checkbox hidden" ${isChecked ? "checked" : ""}>
+                            <label for="task-${
+                              task.id
+                            }" class="flex items-center cursor-pointer text-base sm:text-lg text-gray-200 w-full transition-colors duration-200 hover:text-white">
+                                <span class="task-circle w-6 h-6 mr-4 border-2 border-gray-500 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="flex-grow">${task.text}</span>
+                                <span class="text-xs font-bold text-blue-400 bg-gray-700/50 px-2 py-1 rounded-md ml-4">+${
+                                  task.points
+                                } pt</span>
+                            </label>
+                        </div>
+                    `;
+            })
+            .join("");
+
+          updateScores(currentDay);
+          taskList.removeEventListener("change", (e) =>
+            handleTaskToggle(e, currentDay)
+          );
+          taskList.addEventListener("change", (e) =>
+            handleTaskToggle(e, currentDay)
+          );
+        }
+
+        // --- INITIALIZATION ---
+        function init() {
+          loadState();
+
+          let storedStartDate = localStorage.getItem("challengeStartDate");
+          if (!storedStartDate) {
+            // --- EDIT THIS LINE TO CHANGE START BEHAVIOR ---
+            // dayjs() -> starts today
+            // dayjs().add(2, 'days') -> starts in 2 days
+            const newStartDate = dayjs().add(0, "days").startOf("day").format();
+            localStorage.setItem("challengeStartDate", newStartDate);
+            storedStartDate = newStartDate;
+          }
+          challengeStartDate = dayjs(storedStartDate);
+
+          render();
+          updateClock();
+          setInterval(updateClock, 1000);
+          resetButton.addEventListener("click", handleReset);
+        }
+
+        init();
+      });
+    </script>
+  </body>
+</html>
