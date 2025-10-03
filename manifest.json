@@ -1,0 +1,21 @@
+{
+  "name": "Daily Command Center",
+  "short_name": "Command",
+  "start_url": "/tracker.html",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/111827/FFFFFF/png?text=Icon",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/111827/FFFFFF/png?text=Icon",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
